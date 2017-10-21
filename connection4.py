@@ -82,6 +82,8 @@ def do_VALE(bE, sE, bZ, sZ):
 
 # ~~~~~============== MAIN LOOP ==============~~~~~
 
+exchange = None
+
 def main():
     from random import random
     exchange = connect()
