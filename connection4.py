@@ -99,9 +99,12 @@ def main():
     # Since many write messages generate marketdata, this will cause an
     # exponential explosion in pending messages. Please, don't do that!
     VALE = []
+    VALE_orders = [0,0]
     VALEZ = []
+    VALBZ_orders = [0,0]
     while True:
         msg = read_from_exchange(exchange)
+        print("The exchange replied:", msg, file=sys.stderr)
         if (msg["type"] == "book"):
             #print("The exchange replied:", msg, file=sys.stderr)
             if (msg["symbol"] == "VALE"):
