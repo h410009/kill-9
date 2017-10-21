@@ -63,6 +63,8 @@ def convert(symbol, direction, units):
     return n
 
 def do_VALE(bE, sE, bZ, sZ):
+    print("Compare:", bE[0], sE[0], bZ[0], sZ[0])
+
     if((bZ[0] - sE[0]) * min(sE[1], bZ[1]) > 15):
         units = min(sE[1], bZ[1])
         buy("VALE", sE[0], units)
@@ -114,7 +116,7 @@ def main():
                         VALE = []
                         VALEZ = []
 
-        if msg["type"] == "ack":
+        if msg["type"] == "fill":
             print("The exchange replied:", msg, file=sys.stderr)
             buy("BOND", 998, 20)
             sell("BOND", 1002, 20)
