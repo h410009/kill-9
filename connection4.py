@@ -117,6 +117,9 @@ def main():
                         VALE = []
                         VALEZ = []
 
+        if msg["type"] == "ack":
+            print("The exchange replied:", msg, file=sys.stderr)
+
         if msg["type"] == "fill":
             print("The exchange replied:", msg, file=sys.stderr)
             buy("BOND", 998, 20)
