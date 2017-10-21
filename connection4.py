@@ -64,12 +64,14 @@ def convert(symbol, direction, units):
 
 def do_VALE(bE, sE, bZ, sZ):
     print("Compare:", bE[0], sE[0], bZ[0], sZ[0], (bZ[0] - sE[0]) * min(sE[1], bZ[1]), (bE[0] - sZ[0]) * min(sZ[1], bE[1]))
+    global VALE_orders
+    global VALBZ_orders
 
     if((bZ[0] - sE[0]) * min(sE[1], bZ[1]) > 15):
         units = min(sE[1], bZ[1])
-        buy("VALE", sE[0], units)
+        buy("VALE", sE[0], min(0, units - VALE_orders[0]))
         convert("VALE", "SELL", units)
-        sell("VALBZ", bZ[0], units)
+        sell("VALBZ", bZ[0], min(0, units - VALBZ_orders[0]))
         return True
 
     if((bE[0] - sZ[0]) * min(sZ[1], bE[1]) > 15):
@@ -85,9 +87,12 @@ def do_VALE(bE, sE, bZ, sZ):
 # ~~~~~============== MAIN LOOP ==============~~~~~
 
 exchange = None
+ASSETS = {"VALE": [0,0,0], "VALBZ": [0,0,0]}
+POSITION = [0,0]
 
 def main():
     global exchange
+    global ASSETS
     exchange = connect()
     write_to_exchange(exchange, {"type": "hello", "team": team_name.upper()})
     buy("BOND", 998, 100)
@@ -98,10 +103,6 @@ def main():
     # time for every read_from_exchange() response.
     # Since many write messages generate marketdata, this will cause an
     # exponential explosion in pending messages. Please, don't do that!
-    VALE = []
-    VALE_orders = [0,0]
-    VALEZ = []
-    VALBZ_orders = [0,0]
     while True:
         msg = read_from_exchange(exchange)
         print("The exchange replied:", msg, file=sys.stderr)
@@ -124,6 +125,9 @@ def main():
             print("The exchange replied:", msg, file=sys.stderr)
 
         if msg["type"] == "fill":
+            if (msg["symbol"] == "VALE" or msg["symbol"] == "VALBZ"):
+                ASSETS[msg["symbol"]] += -1 * (msg["dir"] == "SELL") * msg["size"]
+
             print("The exchange replied:", msg, file=sys.stderr)
             buy("BOND", 998, 20)
             sell("BOND", 1002, 20)
