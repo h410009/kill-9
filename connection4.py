@@ -103,7 +103,7 @@ def main():
     while True:
         msg = read_from_exchange(exchange)
         if (msg["type"] == "book"):
-            print("The exchange replied:", msg, file=sys.stderr)
+            #print("The exchange replied:", msg, file=sys.stderr)
             if (msg["symbol"] == "VALE"):
                 VALE = split(msg["buy"], msg["sell"])
                 if len(VALEZ):
