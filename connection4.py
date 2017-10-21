@@ -43,7 +43,7 @@ def read_from_exchange(exchange):
 
 
 def split (buy, sell):
-    if buy or sell:
+    if buy and sell:
         return [min(sell), max(buy)]
     return []
 
