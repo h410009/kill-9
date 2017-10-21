@@ -55,12 +55,12 @@ def main():
     # Since many write messages generate marketdata, this will cause an
     # exponential explosion in pending messages. Please, don't do that!
     n = random.randint(1, 999999)
-    while True: 
+    while True:
         hello_from_exchange = read_from_exchange(exchange)
         if hello_from_exchange["type"] == "ack":
             print("The exchange replied:", hello_from_exchange, file=sys.stderr)
             n += 4
-	    write_to_exchange(exchange, {"type": "add", "order_id": n+2, "symbol": "BOND", "dir": "BUY", "price": 999, "size": 20})
+            write_to_exchange(exchange, {"type": "add", "order_id": n+2, "symbol": "BOND", "dir": "BUY", "price": 999, "size": 20})
             write_to_exchange(exchange, {"type": "add", "order_id": n+3, "symbol": "BOND", "dir": "SELL", "price": 1002, "size": 20})
 
 if __name__ == "__main__":
