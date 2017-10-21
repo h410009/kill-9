@@ -49,11 +49,13 @@ def split (buy, sell):
 
 def buy(symbol, price, units):
     n = random.randint(1, 999999)
+    port.orders.update(Order(n, "BUY", symbol, size, price))
     write_to_exchange(exchange, {"type": "add", "order_id": n, "symbol": symbol, "dir": "BUY", "price": price, "size": units})
     return n
 
 def sell(symbol, price, units):
     n = random.randint(1, 999999)
+    port.orders.update(Order(n, "SELL", symbol, size, price))
     write_to_exchange(exchange, {"type": "add", "order_id": n, "symbol": symbol, "dir": "SELL", "price": price, "size": units})
     return n
 
@@ -87,50 +89,67 @@ def do_VALE(bE, sE, bZ, sZ):
 # ~~~~~============== MAIN LOOP ==============~~~~~
 
 exchange = None
-ASSETS = {"VALE": [0,0,0], "VALBZ": [0,0,0]}
-POSITION = [0,0]
+
+class Order():
+   def __init__(self, n, kind, symbol, size, price):
+       self.n = n
+       self.kind = kind
+       self.symbol = symbol
+       self.size = size
+       self.price = price
+
+class Portfolio():
+   def __init__(self):
+       self.positions = {“GS”: 0, “MS”: 0, “WFC”: 0, “XLF”: 0, “VALE”: 0, “VALBZ”: 0}
+       self.highBuy = {‘GS’:0, ‘MS’:0, ‘WFC’:0, ‘XLF’:0, ‘VALBZ’:0, ‘VALE’:0, ‘BOND’:0}
+       self.lowSell = {‘GS’:0, ‘MS’:0, ‘WFC’:0, ‘XLF’:0, ‘VALBZ’:0, ‘VALE’:0, ‘BOND’:0}
+       self.highBuyQuant = {‘GS’:0, ‘MS’:0, ‘WFC’:0, ‘XLF’:0, ‘VALBZ’:0, ‘VALE’:0, ‘BOND’:0}
+       self.lowSellQuant = {‘GS’:0, ‘MS’:0, ‘WFC’:0, ‘XLF’:0, ‘VALBZ’:0, ‘VALE’:0, ‘BOND’:0}
+       self.buyTot = {‘GS’:0, ‘MS’:0, ‘WFC’:0, ‘XLF’:0, ‘VALBZ’:0, ‘VALE’:0, ‘BOND’:0}
+       self.sellTot = {‘GS’:0, ‘MS’:0, ‘WFC’:0, ‘XLF’:0, ‘VALBZ’:0, ‘VALE’:0, ‘BOND’:0}
+       self.orders = {}
+       self.symbolLimit = {‘BOND’:100, ‘GS’: 100, ‘MS’: 100, ‘WFC’: 100, ‘XLF’: 100, ‘VALBZ’: 10, ‘VALE’: 10}
+
+port = Portfolio();
+
+def fill_Logic():
+    global port
+    if (port.buyTot["BOND"] < 80):
+        Buy("BOND", 999, 20)
+    if (port.selTot["BOND"] < 80):
+        Sell("BOND", 1001, 20)
 
 def main():
-    global exchange
-    global ASSETS
+    global port
     exchange = connect()
     write_to_exchange(exchange, {"type": "hello", "team": team_name.upper()})
-    buy("BOND", 998, 100)
-    sell("BOND", 1002, 100)
-    write_to_exchange(exchange, {"type": "add", "order_id": 1, "symbol": "BOND", "dir": "BUY", "price": 998, "size": 20})
-    write_to_exchange(exchange, {"type": "add", "order_id": 2, "symbol": "BOND", "dir": "SELL", "price": 1002, "size": 20})
-    # A common mistake people make is to call write_to_exchange() > 1
-    # time for every read_from_exchange() response.
-    # Since many write messages generate marketdata, this will cause an
-    # exponential explosion in pending messages. Please, don't do that!
+    buy("BOND", 999, 100)
+    sell("BOND", 1001, 100)
+
     while True:
         msg = read_from_exchange(exchange)
-        print("The exchange replied:", msg, file=sys.stderr)
+
+        if msg["type"] == "fill":
+            port.positions += -1 * (msg["dir"] == "SELL") * msg["size"]
+
         if (msg["type"] == "book"):
-            #print("The exchange replied:", msg, file=sys.stderr)
-            if (msg["symbol"] == "VALE"):
-                VALE = split(msg["buy"], msg["sell"])
-                if VALE and VALEZ:
-                    if do_VALE(VALE[0],VALE[1], VALEZ[0],VALEZ[1]):
-                        VALE = []
-                        VALEZ = []
-            if (msg["symbol"] == "VALBZ"):
-                VALEZ = split(msg["buy"], msg["sell"])
-                if VALE and VALEZ:
-                    if do_VALE(VALE[0],VALE[1], VALEZ[0],VALEZ[1]):
-                        VALE = []
-                        VALEZ = []
+            port.highBuy[msg["symbol"]] = (max(buy)[0] if msg["buy"] else 0)
+            port.highBuyQuant[msg["symbol"]] = (max(buy)[1] if msg["buy"] else 0)
+            port.lowSell[msg["symbol"]] = (min(sell)[0] if msg["buy"] else 10000)
+            port.lowSellQuant[msg["symbol"]] = (min(sell)[1] if msg["buy"] else 0)
 
         if msg["type"] == "ack":
-            print("The exchange replied:", msg, file=sys.stderr)
+            print("ACK:", msg, file=sys.stderr)
+
+        if msg["type"] == "reject":
+            del port.orders[msg["order_id"]]
+            print("ERROR:", msg, file=sys.stderr)
 
         if msg["type"] == "fill":
             if (msg["symbol"] == "VALE" or msg["symbol"] == "VALBZ"):
                 ASSETS[msg["symbol"]] += -1 * (msg["dir"] == "SELL") * msg["size"]
+            fill_Logic()
 
-            print("The exchange replied:", msg, file=sys.stderr)
-            buy("BOND", 998, 20)
-            sell("BOND", 1002, 20)
 
 if __name__ == "__main__":
     main()
