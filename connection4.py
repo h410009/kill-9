@@ -10,7 +10,6 @@ import sys
 import socket
 import json
 import random
-from random import random
 
 # ~~~~~============== CONFIGURATION  ==============~~~~~
 # replace REPLACEME with your team name!
