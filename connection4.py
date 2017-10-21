@@ -85,7 +85,7 @@ def do_VALE(bE, sE, bZ, sZ):
 exchange = None
 
 def main():
-    from random import random
+    global exchange
     exchange = connect()
     write_to_exchange(exchange, {"type": "hello", "team": team_name.upper()})
     buy("BOND", 998, 100)
