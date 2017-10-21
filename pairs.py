@@ -140,8 +140,7 @@ class ConvTrade:
          # BE CAREFUL, WHEN BUYING XLF, THE SYNTAX MUST BE "CONVERT"
          # NOT "BUY"
 
-        return self._buyETF
-        return self._sellETF  
+        return self._buyETF,self._sellETF  
 
 """
 
