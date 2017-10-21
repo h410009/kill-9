@@ -61,11 +61,9 @@ class MarketMaker:
             for idx in range(len(self._curr_bids[stock])):
                 if self._curr_bids[stock][idx][0] == ord:
                     to_delete.append(idx)
-            self._curr_bids[stock] = [i for j, i in \
-                enumerate(self._curr_bids[stock]) if j not in to_delete]
-
+            del self._curr_bids[stock][to_delete] # delte filled bids
             self._inventory[stock] += loc_quant
-            self.cash -= self._buyprices[stock] * loc_quant
+            cash -= self._buyprices[stock] * loc_quant
 
         if action == 'SELL':
             to_delete = []
@@ -73,11 +71,9 @@ class MarketMaker:
             for idx in range(len(self._curr_asks[stock])):
                 if self._curr_asks[stock][idx][0] == ord:
                     to_delete.append(idx)
-            self._curr_asks[stock] = [i for j, i in \
-                enumerate(self._curr_asks[stock]) if j not in to_delete]
-
+            del self._curr_asks[stock][to_delete] # delete filled asks
             self._inventory[stock] -= loc_quant # 
-            self.cash += self._sellprices[stock] * loc_quant
+            cash += self._sellprices[stock] * loc_quant
 
     def get_class_prices(self, stock):
         return self._buyprices[stock], self._sellprices[stock], \
@@ -92,8 +88,13 @@ class MarketMaker:
 
         length_buy, length_sell = len(book['buy']), len(book['sell'])
         if length_buy and length_sell:
-            buyprices = max(book['buy'])[0]
-            sellprices = min(book['sell'])[0]
+            for idx in range(length_buy):
+                buyprices += book['buy'][idx][0]
+            buyprices //= length_buy
+
+            for idx in range(length_sell):
+                sellprices += book['sell'][idx][0]
+            sellprices //= length_sell
 
             return buyprices, sellprices
 
@@ -107,9 +108,16 @@ class MarketMaker:
         length_buy, length_sell = len(book['buy']), len(book['sell'])
 
         if length_buy and length_sell: # only update if we get both prices
-            self._buyprices[key] = max(book['buy'])[0] + 1
-            self._sellprices[key] = min(book['sell'])[0] - 1   
-
+            self._buyprices[key] = 0.0
+            self._sellprices[key] = 0.0
+     
+            for idx in range(length_buy):
+                self._buyprices[key] += book['buy'][idx][0]
+            self._buyprices[key] //= length_buy
+     
+            for idx in range(length_sell):
+                self._sellprices[key] += book['sell'][idx][0]
+            self._sellprices[key] //= length_sell
             self._spreads[key] = self._sellprices[key] - self._buyprices[key] 
 
     def purge(self, _):
@@ -210,10 +218,10 @@ def main():
      
                 print(buyprice,class_buyprice,sellprice,class_sellprice,class_spread)
             
-                purge_flag = 0   
-                if abs((buyprice - sellprice) - \
-                    (class_buyprice - class_sellprice)) >= class_spread:
-                    purge_flag = 1
+               #purge_flag = 0   
+               #if abs((buyprice - sellprice) - \
+               #    (class_buyprice - class_sellprice)) >= class_spread:
+               #    purge_flag = 1
 
                #if purge_flag: # if we purge, reset status:
                #    print("purging")
@@ -229,9 +237,9 @@ def main():
                     write_to_exchange(exchange, orders[0])
                     write_to_exchange(exchange, orders[1])
         if msg["type"] == "fill":
-            MM.update_inventory(msg)
-        if msg["type"] == "ack":
-            print(msg)
+            update_inventory(msg)
+        if msg["type"] == 'ack':
+            print("ACKNOWLEDGED")
 
 if __name__ == "__main__":
     main()
