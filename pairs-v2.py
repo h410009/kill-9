@@ -63,6 +63,14 @@ class PairsTrading(MovAvg):
         for _ in self._pairs:
             ?????????
 """
+def split (buy, sell):
+    buy_tuples = [tuple(x) for x in buy]
+    sell_tuples = [tuple(x) for x in sell]
+    min_buy_price, min_buy_quant = min(buy_tuples)
+    min_sell_price, min_sell_quant = min(sell_tuples)
+    max_buy_price, max_buy_quant = max(buy_tuples)
+    max_sell_price, max_sell_quant = max(sell_tuples)
+
 
 class Market_Maker:
     def __init__(self):
