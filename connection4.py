@@ -69,14 +69,14 @@ def do_VALE(bE, sE, bZ, sZ):
         units = min(sE[1], bZ[1])
         buy("VALE", sE[0], units)
         convert("VALE", "SELL", units)
-        sell("VALEBZ", bZ[0], units)
+        sell("VALBZ", bZ[0], units)
         return True
 
     if((bE[0] - sZ[0]) * min(sZ[1], bE[1]) > 15):
         units = min(sZ[1], bE[1])
         buy("VALEZ", sZ[0], units)
         convert("VALE", "BUY", units)
-        sell("VALEBZ", bE[0], units)
+        sell("VALBZ", bE[0], units)
         return True
 
     return False
