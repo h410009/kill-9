@@ -83,18 +83,6 @@ class ConvTrade:
         self._begin_time =  int(round(time.time())) # time in seconds
         self._current_time = self._begin_time
 
-    def purge(self):
-        self._buyETF = {"XLF": 0, "GS": 0, "MS": 0, "WFC": 0, "BOND": 0}
-        self._sellETF = {"XLF": self._inventory["XLF"], 
-            "GS": self._inventory["GS"], 
-            "MS": self._inventory["MS"], 
-            "WFC": self._inventory["WFC"], 
-            "BOND": self._inventory["BOND"]
-        }
-        self._inventory = {"XLF": 0, "VALE": 0, "VALBZ": 0, "GS": 0, \
-            "BOND": 0, "MS": 0,  "WFC": 0}
-
-
     ## one should first check if the transaction was successful,
     ## if that is true
     def update_inventory(self, buysignal, sellsignal):
@@ -114,46 +102,43 @@ class ConvTrade:
         # update time
         self._curent_time = int(round(time.time()))
         
-        if self._current_time - self._begin_time < (60 * 5 - 20):
-            self._purge()
-        else:
-            if diff_1 > 0.0:
-                quant_MS = (100 - self.inventory["MS"]) // 3
-                quant_GS = (100 - self.inventory["GS"]) // 2
-                quant_BOND = (100 - self.inventory["BOND"]) // 3
-                quant_WFC = (100 - self.inventory["WFC"]) // 2
-                quant_XLF = (100 + self.inventory["XLF"]) // 10
-                quant = min(quant_MS,quant_GS,quant_BOND,quant_WFC,quant_XLF)
+        if diff_1 > 0.0:
+            quant_MS = (100 - self.inventory["MS"]) // 3
+            quant_GS = (100 - self.inventory["GS"]) // 2
+            quant_BOND = (100 - self.inventory["BOND"]) // 3
+            quant_WFC = (100 - self.inventory["WFC"]) // 2
+            quant_XLF = (100 + self.inventory["XLF"]) // 10
+            quant = min(quant_MS,quant_GS,quant_BOND,quant_WFC,quant_XLF)
     
-                self._buyETF = {"XLF": 0, "GS": 2*quant, "MS": 3*quant, 
-                    "WFC": 2*quant, "BOND": 3*quant}
-                self._sellETF = {"XLF":10*quant,"GS":0,"MS":0,"WFC":0,"BOND":0}
-                self._inventory["XLF"] -= 10 * quant 
-                self._inventory["GS"] += 2*quant
-                self._inventory["BOND"] += 3*quant
-                self._inventory["WFC"] += 2*quant
-                self._inventory["MS"] += 3*quant
+            self._buyETF = {"XLF": 0, "GS": 2*quant, "MS": 3*quant, 
+                "WFC": 2*quant, "BOND": 3*quant}
+            self._sellETF = {"XLF":10*quant,"GS":0,"MS":0,"WFC":0,"BOND":0}
+            self._inventory["XLF"] -= 10 * quant 
+            self._inventory["GS"] += 2*quant
+            self._inventory["BOND"] += 3*quant
+            self._inventory["WFC"] += 2*quant
+            self._inventory["MS"] += 3*quant
    
-            if diff_2 > 0.0:
-                quant_MS = (100 + self.inventory["MS"]) // 3
-                quant_GS = (100 + self.inventory["GS"]) // 2
-                quant_BOND = (100 + self.inventory["BOND"]) // 3
-                quant_WFC = (100 + self.inventory["WFC"]) // 2
-                quant_XLF = (100 - self.inventory["XLF"]) // 10
-                quant = min(quant_MS, quant_GS, quant_BOND, quant_WFC,quant_XLF)
+        if diff_2 > 0.0:
+            quant_MS = (100 + self.inventory["MS"]) // 3
+            quant_GS = (100 + self.inventory["GS"]) // 2
+            quant_BOND = (100 + self.inventory["BOND"]) // 3
+            quant_WFC = (100 + self.inventory["WFC"]) // 2
+            quant_XLF = (100 - self.inventory["XLF"]) // 10
+            quant = min(quant_MS, quant_GS, quant_BOND, quant_WFC,quant_XLF)
     
-                self._sellETF = {"XLF": 0, "GS": 2*quant, "MS": 3*quant, 
-                    "WFC": 2*quant, "BOND": 3*quant}
-                self._buyETF = {"XLF":10*quant,"GS":0,"MS":0,"WFC":0,"BOND":0}
+            self._sellETF = {"XLF": 0, "GS": 2*quant, "MS": 3*quant, 
+                "WFC": 2*quant, "BOND": 3*quant}
+            self._buyETF = {"XLF":10*quant,"GS":0,"MS":0,"WFC":0,"BOND":0}
 
-                self._inventory["XLF"] += 10 * quant
-                self._inventory["GS"] -= 2*quant
-                self._inventory["BOND"] -= 3*quant
-                self._inventory["WFC"] -= 2*quant
-                self._inventory["MS"] -= 3*quant
+            self._inventory["XLF"] += 10 * quant
+            self._inventory["GS"] -= 2*quant
+            self._inventory["BOND"] -= 3*quant
+            self._inventory["WFC"] -= 2*quant
+            self._inventory["MS"] -= 3*quant
 
-             # BE CAREFUL, WHEN BUYING XLF, THE SYNTAX MUST BE "CONVERT"
-             # NOT "BUY"
+         # BE CAREFUL, WHEN BUYING XLF, THE SYNTAX MUST BE "CONVERT"
+         # NOT "BUY"
 
         return self._buyETF
         return self._sellETF  
