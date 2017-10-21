@@ -102,13 +102,13 @@ def main():
         msg = read_from_exchange(exchange)
         if (msg["type"] == "book"):
             if (msg["symbol"] == "VALE"):
-                VALE = split[msg["buy"], msg["sell"]]
+                VALE = split(msg["buy"], msg["sell"])
                 if len(VALEZ):
                     if do_VALE(VALE[0],VALE[1], VALEZ[0],VALEZ[1]):
                         VALE = []
                         VALEZ = []
             if (msg["symbol"] == "VALEZ"):
-                VALEZ = split[msg["buy"], msg["sell"]]
+                VALEZ = split(msg["buy"], msg["sell"])
                 if len(VALE):
                     if do_VALE(VALE[0],VALE[1], VALEZ[0],VALEZ[1]):
                         VALE = []
