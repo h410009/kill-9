@@ -63,7 +63,7 @@ def convert(symbol, direction, units):
     return n
 
 def do_VALE(bE, sE, bZ, sZ):
-    print("Compare:", bE[0], sE[0], bZ[0], sZ[0])
+    print("Compare:", bE[0], sE[0], bZ[0], sZ[0], (bZ[0] - sE[0]) * min(sE[1], bZ[1]), (bE[0] - sZ[0]) * min(sZ[1], bE[1]))
 
     if((bZ[0] - sE[0]) * min(sE[1], bZ[1]) > 15):
         units = min(sE[1], bZ[1])
