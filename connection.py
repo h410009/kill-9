@@ -12,7 +12,7 @@ import json
 
 # ~~~~~============== CONFIGURATION  ==============~~~~~
 # replace REPLACEME with your team name!
-team_name="REPLACEME"
+team_name="ORANGE"
 # This variable dictates whether or not the bot is connecting to the prod
 # or test exchange. Be careful with this switch!
 test_mode = True
@@ -44,14 +44,24 @@ def read_from_exchange(exchange):
 # ~~~~~============== MAIN LOOP ==============~~~~~
 
 def main():
+    from random import random
     exchange = connect()
     write_to_exchange(exchange, {"type": "hello", "team": team_name.upper()})
-    hello_from_exchange = read_from_exchange(exchange)
+    write_to_exchange(exchange, {"type": "add", "order_id": 1, "symbol": "BOND", "dir": "BUY", "price": 998, "size": 20})
+    write_to_exchange(exchange, {"type": "add", "order_id": 2, "symbol": "BOND", "dir": "SELL", "price": 1002, "size": 20})
     # A common mistake people make is to call write_to_exchange() > 1
     # time for every read_from_exchange() response.
     # Since many write messages generate marketdata, this will cause an
     # exponential explosion in pending messages. Please, don't do that!
-    print("The exchange replied:", hello_from_exchange, file=sys.stderr)
+    n = 3
+    while True:
+        hello_from_exchange = read_from_exchange(exchange)
+        if hello_from_exchange["type"] == "ack":
+                print("The exchange replied:", hello_from_exchange, file=sys.stderr)
+                n += 4
+                write_to_exchange(exchange, {"type": "add", "order_id": n+2, "symbol": "BOND", "dir": "BUY", "price": 999, "size": 20})
+                write_to_exchange(exchange, {"type": "add", "order_id": n+3, "symbol": "BOND", "dir": "SELL", "price": 1002, "size": 20})
+
 
 if __name__ == "__main__":
     main()
