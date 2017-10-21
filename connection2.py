@@ -57,6 +57,8 @@ def main():
     n = random.randint(1, 999999)
     while True:
         hello_from_exchange = read_from_exchange(exchange)
+        if hello_from_exchange["type"] == "book":
+            if hello_from_exchange["symbol"] == "VALE":
         if hello_from_exchange["type"] == "ack":
             print("The exchange replied:", hello_from_exchange, file=sys.stderr)
             n += 4

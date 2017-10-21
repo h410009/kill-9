@@ -10,6 +10,7 @@ import sys
 import socket
 import json
 import random
+from random import random
 
 # ~~~~~============== CONFIGURATION  ==============~~~~~
 # replace REPLACEME with your team name!
@@ -42,26 +43,80 @@ def read_from_exchange(exchange):
     return json.loads(exchange.readline())
 
 
+def split (buy, sell):
+    if buy or sell:
+        return [min(sell), max(buy)]
+    return []
+
+def buy(symbol, price, units):
+    n = random.randint(1, 999999)
+    write_to_exchange(exchange, {"type": "add", "order_id": n, "symbol": symbol, "dir": "BUY", "price": price, "size": units})
+    return n
+
+def sell(symbol, price, units):
+    n = random.randint(1, 999999)
+    write_to_exchange(exchange, {"type": "add", "order_id": n, "symbol": symbol, "dir": "SELL", "price": price, "size": units})
+    return n
+
+def convert(symbol, direction, units):
+    n = random.randint(1, 999999)
+    write_to_exchange(exchange, {"type": "convert", "order_id": n, "symbol": symbol, "dir": direction, "size": units})
+    return n
+
+def do_VALE(bE, sE, bZ, sZ):
+    if((bZ[0] - sE[0]) * min(sE[1], bZ[1]) > 15):
+        units = min(sE[1], bZ[1])
+        buy("VALE", sE[0], units)
+        convert("VALE", "SELL", units)
+        sell("VALEBZ", bZ[0], units)
+        return True
+
+    if((bE[0] - sZ[0]) * min(sZ[1], bE[1]) > 15):
+        units = min(sZ[1], bE[1])
+        buy("VALEZ", sZ[0], units)
+        convert("VALE", "BUY", units)
+        sell("VALEBZ", bE[0], units)
+        return True
+
+    return False
+
+
 # ~~~~~============== MAIN LOOP ==============~~~~~
 
 def main():
     from random import random
     exchange = connect()
     write_to_exchange(exchange, {"type": "hello", "team": team_name.upper()})
+    buy("BOND", 998, 100)
+    sell("BOND", 1002, 100)
     write_to_exchange(exchange, {"type": "add", "order_id": 1, "symbol": "BOND", "dir": "BUY", "price": 998, "size": 20})
     write_to_exchange(exchange, {"type": "add", "order_id": 2, "symbol": "BOND", "dir": "SELL", "price": 1002, "size": 20})
     # A common mistake people make is to call write_to_exchange() > 1
     # time for every read_from_exchange() response.
     # Since many write messages generate marketdata, this will cause an
     # exponential explosion in pending messages. Please, don't do that!
-    n =4
+    VALE = []
+    VALEZ = []
     while True:
-        hello_from_exchange = read_from_exchange(exchange)
-        if hello_from_exchange["type"] == "ack":
-            print("The exchange replied:", hello_from_exchange, file=sys.stderr)
-            n += 4
-            write_to_exchange(exchange, {"type": "add", "order_id": n+2, "symbol": "BOND", "dir": "BUY", "price": 999, "size": 20})
-            write_to_exchange(exchange, {"type": "add", "order_id": n+3, "symbol": "BOND", "dir": "SELL", "price": 1002, "size": 20})
+        msg = read_from_exchange(exchange)
+        if (msg["type"] == "book"):
+            if (msg["symbol"] == "VALE"):
+                VALE = split[msg["buy"], msg["sell"]]
+                if len(VALEZ):
+                    if do_VALE(*VALE, *VALEZ):
+                        VALE = []
+                        VALEZ = []
+            if (msg["symbol"] == "VALEZ"):
+                VALEZ = split[msg["buy"], msg["sell"]]
+                if len(VALE):
+                    if do_VALE(*VALE, *VALEZ):
+                        VALE = []
+                        VALEZ = []
+
+        if msg["type"] == "ack":
+            print("The exchange replied:", msg, file=sys.stderr)
+            buy("BOND", 998, 20)
+            sell("BOND", 1002, 20)
 
 if __name__ == "__main__":
     main()
